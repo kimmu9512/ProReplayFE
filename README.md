@@ -1,2 +1,0 @@
-# ProReplayFE
-FrontEnd for ProReplay
