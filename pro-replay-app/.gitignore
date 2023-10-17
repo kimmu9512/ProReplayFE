@@ -17,8 +17,7 @@
 
 # misc
 .DS_Store
-*.pem
-
+*.pelvcou
 # debug
 npm-debug.log*
 yarn-debug.log*

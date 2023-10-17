@@ -1,6 +1,67 @@
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+const DynamicLogin = dynamic(() => import("../components/Login"), {
+  loading: () => <p>Loading...</p>, // You can add a loading spinner or placeholder here
+  ssr: false,
+});
+const DynamicSearchBar = dynamic(() => import("../components/SearchBar"), {
+  loading: () => <p>Loading...</p>, // You can add a loading spinner or placeholder here
+  ssr: false,
+});
+const DynamicSummonerCard = dynamic(
+  () => import("../components/SummonerCard"),
+  {
+    loading: () => <p>Loading...</p>, // You can add a loading spinner or placeholder here
+    ssr: false,
+  }
+);
+import { auth, logout, getFirebaseAuth } from "../lib/firebase/firebase";
+import withAuth from "../lib/firebase/withAuth";
+import { getSummoner } from "../lib/backEndService";
+import React, { useState } from "react";
+import { set } from "firebase/database";
 
-export default function Home() {
+function AuthenticatedContent() {
+  const auth = getFirebaseAuth();
+  // States for handling the search experience
+  const [isLoading, setIsLoading] = useState(false);
+  const [summonerData, setSummonerData] = useState(null);
+  const [error, setError] = useState<Error | null>(null);
+  const handleSummonerSearch = async (summonerName: string, region: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const summoner = await getSummoner(summonerName, region);
+      setSummonerData(summoner);
+      alert(JSON.stringify(summoner));
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-bold mb-4">Welcome!</h1>
+      <DynamicSearchBar onSearch={handleSummonerSearch} />
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error.message}</p>}
+      {summonerData && <DynamicSummonerCard summoner={summonerData} />}
+      <button
+        onClick={logout}
+        className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Logout
+      </button>
+    </div>
+  );
+}
+
+function Home({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -15,7 +76,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -27,18 +88,7 @@ export default function Home() {
           </a>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
+      {isAuthenticated ? <AuthenticatedContent /> : <DynamicLogin />}
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
         <a
           href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
@@ -47,7 +97,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
+            Docs{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -64,7 +114,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
+            Learn{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -81,7 +131,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
+            Templates{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -98,7 +148,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
+            Deploy{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -109,5 +159,6 @@ export default function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }
+export default withAuth(Home);

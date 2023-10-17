@@ -13,4 +13,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-export { auth };
+const getFirebaseAuth = () => {
+  return getAuth(app);
+};
+
+const logout = () => {
+  auth.signOut();
+};
+export { auth, getFirebaseAuth, logout };
