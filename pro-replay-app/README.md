@@ -1,7 +1,7 @@
 # ProReplay Frontend
 
 This is the frontend for [ProReplay](#). The corresponding backend for ProReplay can be found [here](https://github.com/kimmu9512/ProReplay).
-
+Please refer to the backend link for description of what ProReplay is.
 **Note**: The backend must be running in order for the frontend to work properly.
 
 ## Getting Started
